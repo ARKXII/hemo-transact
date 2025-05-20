@@ -7,8 +7,8 @@ export default function Home() {
   const fieldConfig = [
     { id: "Date", label: "Date ", column: "B", type: "date" },
     {
-      id: "Category",
-      label: "Category",
+      id: "Credit Card",
+      label: "Credit Card",
       column: "C",
       type: "select",
       options: ["BDO Gold", "SB Wave", "UB UVisa Plat", "Maya"],
@@ -32,7 +32,7 @@ export default function Home() {
     const initialValues = Object.fromEntries(
       fieldConfig.map((field) => {
         // Set field1 to today's date, others to empty string
-        return [field.id, field.id === "field1" ? getTodayFormatted() : ""];
+        return [field.id, field.id === "Date" ? getTodayFormatted() : ""];
       })
     );
     return initialValues;
@@ -98,13 +98,6 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-5">
-      <div className="flex flex-row gap-3">
-        <Link href="/dashboard">
-          <button className="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-            Dashboard
-          </button>
-        </Link>
-      </div>
       <div className="w-full max-w-md md:max-w-xl p-6 md:p-8 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-black">
           Enter Transaction
