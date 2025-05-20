@@ -5,16 +5,16 @@ import Link from "next/link";
 export default function Home() {
   // Define field configurations with column mappings
   const fieldConfig = [
-    { id: "Date", label: "Date ", column: "A", type: "date" },
+    { id: "Date", label: "Date ", column: "B", type: "date" },
     {
       id: "Category",
       label: "Category",
-      column: "B",
+      column: "C",
       type: "select",
-      options: ["Personal", "Date", "Grocery", "Meme"],
+      options: ["BDO Gold", "SB Wave", "UB UVisa Plat", "Maya"],
     },
-    { id: "Amount", label: "Amount", column: "C", type: "text" },
-    { id: "Description", label: "Description", column: "D", type: "text" },
+    { id: "Amount", label: "Amount", column: "D", type: "text" },
+    { id: "Description", label: "Description", column: "E", type: "text" },
   ];
 
   // Format date as YYYY-MM-DD for input field
@@ -102,11 +102,6 @@ export default function Home() {
         <Link href="/dashboard">
           <button className="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
             Dashboard
-          </button>
-        </Link>
-        <Link href="/admin">
-          <button className="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-            Admin
           </button>
         </Link>
       </div>

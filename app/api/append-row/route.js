@@ -1,6 +1,4 @@
 import { google } from "googleapis";
-// import fs from "fs";
-// import path from "path";
 
 export async function POST(request) {
   try {
@@ -9,71 +7,64 @@ export async function POST(request) {
     // Check if credentials exist
     const credentials = process.env.GOOGLE_SHEETS_CREDENTIALS;
     if (!credentials) {
-      throw new Error('Google Sheets credentials not found in environment variables');
+      throw new Error(
+        "Google Sheets credentials not found in environment variables"
+      );
     }
-    
-    // Parse credentials safely
-    let parsedCredentials;
-    try {
-      parsedCredentials = JSON.parse(credentials);
-    } catch {
-      throw new Error('Failed to parse Google Sheets credentials. Please check your .env.local file format.');
-    }
-    // const credentialPath = path.join(process.cwd(), "credentials.json");
-    // let parsedCredentials;
-    // try {
-    //   parsedCredentials = JSON.parse(fs.readFileSync(credentialPath, "utf8"));
-    // } catch {
-    //   throw new Error("Failed to read or parse Google Sheets credentials file");
-    // }
-    // Google Auth with error handling
+
+    // Parse credentials
+    const parsedCredentials = JSON.parse(credentials);
     const auth = new google.auth.GoogleAuth({
       credentials: parsedCredentials,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
-    // Check spreadsheet ID
+
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
     if (!spreadsheetId) {
       throw new Error("Google Sheet ID not found in environment variables");
     }
 
     const sheets = google.sheets({ version: "v4", auth });
-    const sheetName = "Transactions"; // Specify the sheet name
+    const sheetName = "Transactions";
 
-    // Step 1: Get the current data to find the next empty row
+    // Get the last row with data in column B (to find next empty row)
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${sheetName}!A:Z`, // Get all data to determine last row
+      range: `${sheetName}!B:B`,
     });
 
-    // Calculate the next row number (rows are 1-indexed in Sheets)
     const values = response.data.values || [];
     const nextRowNumber = values.length + 1;
 
-    // Step 2: Create a sparse array that will place values in correct columns
-    const newRowData = [];
+    // Create a mapping of column letters to their positions (B=0, C=1, etc.)
+    const columnMap = {};
+    let maxColumnIndex = 0;
 
-    // Process each field and place in corresponding column
     fields.forEach((field) => {
-      // Convert column letter to array index (0-based)
-      const columnIndex = field.column.charCodeAt(0) - "A".charCodeAt(0);
-
-      // Ensure the array is large enough to hold this column
-      while (newRowData.length <= columnIndex) {
-        newRowData.push(""); // Fill gaps with empty strings
+      const columnLetter = field.column.toUpperCase();
+      if (columnLetter >= "B" && columnLetter <= "Z") {
+        const columnIndex = columnLetter.charCodeAt(0) - "B".charCodeAt(0);
+        columnMap[columnLetter] = columnIndex;
+        maxColumnIndex = Math.max(maxColumnIndex, columnIndex);
       }
-
-      // Insert the value at the correct column index
-      newRowData[columnIndex] = field.value;
     });
 
-    // Step 3: Append the row to the sheet
+    // Prepare row data starting from column B
+    const rowData = new Array(maxColumnIndex + 1).fill("");
+    fields.forEach((field) => {
+      const columnLetter = field.column.toUpperCase();
+      if (columnMap[columnLetter] !== undefined) {
+        rowData[columnMap[columnLetter]] = field.value;
+      }
+    });
+
+    // Update the sheet starting from column B
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `${sheetName}!A${nextRowNumber}`,
+      range: `${sheetName}!B${nextRowNumber}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [newRowData],
+        values: [rowData],
       },
     });
 
