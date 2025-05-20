@@ -11,7 +11,7 @@ export async function GET() {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const spreadsheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
     if (!spreadsheetId) throw new Error("Missing Google Sheet ID");
 
     // Fetch data using the correct API method

@@ -19,7 +19,7 @@ export async function POST(request) {
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const spreadsheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
     if (!spreadsheetId) {
       throw new Error("Google Sheet ID not found in environment variables");
     }

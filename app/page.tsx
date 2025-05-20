@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+
+const spreadsheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
 
 export default function Home() {
   // Define field configurations with column mappings
@@ -13,7 +14,15 @@ export default function Home() {
       type: "select",
       options: ["BDO Gold", "SB Wave", "UB UVisa Plat", "Maya"],
     },
-    { id: "Amount", label: "Amount", column: "D", type: "text" },
+    {
+      id: "Amount",
+      label: "Amount",
+      column: "D",
+      type: "number",
+      inputMode: "decimal",
+      step: "0.01",
+      min: "0",
+    },
     { id: "Description", label: "Description", column: "E", type: "text" },
   ];
 
@@ -66,6 +75,34 @@ export default function Home() {
       })),
     };
 
+    const CurrencyInput = ({
+      value,
+      onChange,
+      ...props
+    }: {
+      value: string | number;
+      onChange: (value: string) => void;
+      [key: string]: any;
+    }) => {
+      const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Remove non-numeric characters except decimal point
+        const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+        onChange(rawValue);
+      };
+
+      return (
+        <input
+          type="number"
+          value={value}
+          onChange={handleChange}
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          {...props}
+        />
+      );
+    };
+
     try {
       const response = await fetch("/api/append-row", {
         method: "POST",
@@ -79,10 +116,10 @@ export default function Home() {
 
       if (response.ok) {
         setMessage(`Data successfully appended to row ${data.rowNumber}!`);
-        // Reset form values, keeping today's date for field1
+        // Reset form values, keeping today's date for Date field
         setFieldValues({
           ...Object.fromEntries(fieldConfig.map((field) => [field.id, ""])),
-          field1: getTodayFormatted(),
+          Date: getTodayFormatted(),
         });
       } else {
         setMessage(`Error: ${data.error}`);
@@ -128,6 +165,25 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
+              ) : field.type === "number" ? (
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                    ₱
+                  </span>
+                  <input
+                    required
+                    type="number"
+                    id={field.id}
+                    name={field.id}
+                    value={fieldValues[field.id] || ""}
+                    onChange={handleChange}
+                    inputMode="decimal"
+                    step="0.01"
+                    min="0"
+                    className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                    placeholder="0.00"
+                  />
+                </div>
               ) : (
                 <input
                   required
@@ -160,7 +216,17 @@ export default function Home() {
                 : "bg-green-100 text-green-700"
             }`}
           >
-            {message}
+            {message}&nbsp;
+            {message.includes("Error") ? (
+              ""
+            ) : (
+              <a
+                href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0`}
+                className="text-blue-500 underline"
+              >
+                View Sheet
+              </a>
+            )}
           </div>
         )}
       </div>
